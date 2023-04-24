@@ -34,9 +34,12 @@
 from acados_template import AcadosOcp, AcadosOcpSolver
 from vehicle_model import export_pendulum_ode_model
 import numpy as np
-from utils import plot_apa
+from utils import plot_apa, plot_xy
+from data import load_data
 
 def main():
+    traj_ref = load_data()
+
     # create ocp object to formulate the OCP
     ocp = AcadosOcp()
 
@@ -44,10 +47,10 @@ def main():
     model = export_pendulum_ode_model()
     ocp.model = model
 
-    Tf = 1.0
+    Tf = 10.0
     nx = model.x.size()[0]
     nu = model.u.size()[0]
-    N = 20
+    N = 100
 
     # set dimensions
     ocp.dims.N = N
@@ -65,18 +68,29 @@ def main():
     ocp.model.cost_expr_ext_cost_e = model.x.T @ Q_mat @ model.x
 
     # set constraints
-    omega_max = 1.0
-    a_max = 6.0
+    omega_max = 9.0
+    a_max = 9.0
     ocp.constraints.lbu = np.array([-omega_max, -a_max])
-    ocp.constraints.ubu = np.array([+omega_max, a_max])
+    ocp.constraints.ubu = np.array([+omega_max, +a_max])
     ocp.constraints.idxbu = np.array([0, 1])
 
-    delta_max = 0.6
-    v_max = 2.0
-    ocp.constraints.x0 = np.array([0.0, 0.0, 0.0, 0.0])
+    x0 = np.array([traj_ref['x'][0], traj_ref['y'][0], traj_ref['phi'][0]])
+    ocp.constraints.x0 = x0
+
+    delta_max = 0.9
+    v_max = 9.0
     ocp.constraints.lbx = np.array([-delta_max, -v_max])
     ocp.constraints.ubx = np.array([+delta_max, +v_max])
     ocp.constraints.idxbx = np.abs([3, 4])
+
+    ocp.constraints.lbx_0 = x0
+    ocp.constraints.ubx_0 = x0
+    ocp.constraints.idxbx_0 = np.array([0, 1, 2])
+
+    xf = np.array([traj_ref['x'][-1], traj_ref['y'][-1], traj_ref['phi'][-1]])
+    ocp.constraints.lbx_e = xf
+    ocp.constraints.ubx_e = xf
+    ocp.constraints.idxbx_e = np.array([0, 1, 2])
 
     # set options
     ocp.solver_options.qp_solver = 'PARTIAL_CONDENSING_HPIPM' # FULL_CONDENSING_QPOASES
@@ -87,6 +101,7 @@ def main():
     # ocp.solver_options.print_level = 1
     ocp.solver_options.nlp_solver_type = 'SQP' # SQP_RTI, SQP
     ocp.solver_options.qp_solver_warm_start = True
+    ocp.solver_options.nlp_solver_max_iter = 500
 
     # set prediction horizon
     ocp.solver_options.tf = Tf
@@ -96,8 +111,13 @@ def main():
     simX = np.ndarray((N+1, nx))
     simU = np.ndarray((N, nu))
 
-    
-    # ocp_solver.set(0, "x", np.array([0.0, 0.0, 0.0, 0.0, 0.0]))
+    # set initial value
+    # x_init = np.linspace(0, Tf, N + 1)
+    # y_init = np.zeros(N + 1)
+    for i in range(N + 1):
+        ocp_solver.set(i, "x", np.array(\
+            [traj_ref['x'][i], traj_ref['y'][i], traj_ref['phi'][i], \
+             traj_ref['delta'][i], traj_ref['v'][i]]))
     status = ocp_solver.solve()
     ocp_solver.print_statistics() # encapsulates: stat = ocp_solver.get_stats("statistics")
 
@@ -107,10 +127,13 @@ def main():
     # get solution
     for i in range(N):
         simX[i,:] = ocp_solver.get(i, "x")
+        # print(simX[i,:])
         simU[i,:] = ocp_solver.get(i, "u")
     simX[N,:] = ocp_solver.get(N, "x")
 
-    plot_apa(np.linspace(0, Tf, N+1), omega_max, simU, simX, latexify=False)
+    # plot_apa(np.linspace(0, Tf, N+1), omega_max, simU, simX, latexify=False)
+    # plot_xy(simX[:, 0], simX[:, 1])
+    plot_xy(traj_ref['x'], traj_ref['y'], simX[:, 0], simX[:, 1])
 
 
 if __name__ == '__main__':

@@ -52,6 +52,17 @@ def latexify_plot():
 
     matplotlib.rcParams.update(params)
 
+def plot_xy(x_ref, y_ref, x=None, y=None):
+    fig = plt.figure()
+    plt.plot(x_ref, y_ref, 'x')
+    plt.xlabel('$x$')
+    plt.ylabel('$y$')
+    plt.axis('equal')
+    if x is not None:
+        plt.plot(x, y)
+    plt.show()
+    return fig
+
 def plot_apa(shooting_nodes, u_max, U, X_true, X_est=None, Y_measured=None, latexify=False, plt_show=True, X_true_label=None):
     """
     Params:
