@@ -86,6 +86,7 @@ def main():
     ocp.solver_options.integrator_type = 'IRK'
     # ocp.solver_options.print_level = 1
     ocp.solver_options.nlp_solver_type = 'SQP' # SQP_RTI, SQP
+    ocp.solver_options.qp_solver_warm_start = True
 
     # set prediction horizon
     ocp.solver_options.tf = Tf
@@ -95,6 +96,8 @@ def main():
     simX = np.ndarray((N+1, nx))
     simU = np.ndarray((N, nu))
 
+    
+    # ocp_solver.set(0, "x", np.array([0.0, 0.0, 0.0, 0.0, 0.0]))
     status = ocp_solver.solve()
     ocp_solver.print_statistics() # encapsulates: stat = ocp_solver.get_stats("statistics")
 
@@ -107,7 +110,7 @@ def main():
         simU[i,:] = ocp_solver.get(i, "u")
     simX[N,:] = ocp_solver.get(N, "x")
 
-    # plot_apa(np.linspace(0, Tf, N+1), Fmax, simU, simX, latexify=False)
+    plot_apa(np.linspace(0, Tf, N+1), omega_max, simU, simX, latexify=False)
 
 
 if __name__ == '__main__':
