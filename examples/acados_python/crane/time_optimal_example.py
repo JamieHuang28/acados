@@ -31,6 +31,8 @@
 # POSSIBILITY OF SUCH DAMAGE.;
 #
 
+import matplotlib 
+matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
 
 from acados_template import AcadosOcp, AcadosOcpSolver, AcadosModel, AcadosSimSolver, AcadosSim

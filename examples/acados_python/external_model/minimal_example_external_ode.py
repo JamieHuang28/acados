@@ -44,6 +44,8 @@ from export_external_ode_model import export_external_ode_model
 import numpy as np
 import os
 import scipy.linalg
+import matplotlib 
+matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
 
 # os.environ["ACADOS_SOURCE_DIR"] =

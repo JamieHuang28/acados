@@ -40,6 +40,8 @@ from export_disturbed_chain_mass_model import export_disturbed_chain_mass_model
 
 from plot_utils import *
 from utils import *
+import matplotlib 
+matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
 
 # create ocp object to formulate the simulation problem

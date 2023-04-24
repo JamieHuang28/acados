@@ -159,7 +159,9 @@ plot_pendulum(ts, Fmax, simU, simX, simXest, simY, latexify=False)
 
 ## plot estimated M over shooting nodes
 
-# import matplotlib.pyplot as plt
+# import matplotlib 
+matplotlib.use('TKAgg')
+import matplotlib.pyplot as plt
 # plt.figure()
 # plt.plot(ts, l_true*np.ones((N+1, 1)), '-')
 # plt.plot(ts, sim_l_est, '.-')

@@ -39,6 +39,8 @@ from acados_template import AcadosSim, AcadosSimSolver, sim_get_default_cmake_bu
 from pendulum_model import export_pendulum_ode_model
 from utils import plot_pendulum
 import numpy as np
+import matplotlib 
+matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
 
 
