@@ -4,6 +4,8 @@ import numpy as np
 import scipy.linalg
 from utils import plot_xy, plot_apa
 from json_parser import GetCollisionCoeff, loadData
+import matplotlib.pyplot as plt
+import time
 
 N_horizon = 100   # Define the number of discretization steps
 T_horizon = 10.0  # Define the prediction horizon
@@ -68,7 +70,7 @@ def create_ocp_solver_description() -> AcadosOcp:
     ocp.solver_options.hessian_approx = "GAUSS_NEWTON"  # 'GAUSS_NEWTON', 'EXACT'
     ocp.solver_options.integrator_type = "IRK"
     ocp.solver_options.nlp_solver_type = "SQP"  # SQP_RTI, SQP
-    ocp.solver_options.nlp_solver_max_iter = 1000
+    ocp.solver_options.nlp_solver_max_iter = 100
 
     # set prediction horizon
     ocp.solver_options.tf = T_horizon
@@ -154,7 +156,10 @@ def closed_loop_simulation():
     acados_ocp_solver.set(N_horizon, "p", wheelBase)
 
     # solve ocp
+    start_time = time.time()
     status = acados_ocp_solver.solve()
+    end_time = time.time()
+    print("elapsed_time = ", end_time - start_time)
     # if status != 0:
     #     raise Exception(f'acados returned status {status}.')
     print(f'acados returned status {status}.')
@@ -164,8 +169,9 @@ def closed_loop_simulation():
     for stage in range(N_horizon):
         simU[stage, :] = acados_ocp_solver.get(stage, "u")
     
-    plot_xy(x, y, simX[:, 0], simX[:, 1])
-    plot_apa(np.linspace(0, T_horizon, N_horizon+1), 1.0, simU, simX, latexify=False)
+    plot_xy(x, y, simX[:, 0], simX[:, 1], plt_show=False)
+    plot_apa(np.linspace(0, T_horizon, N_horizon+1), 1.0, simU, simX, latexify=False, plt_show=False)
+    plt.show()
 
 if __name__ == "__main__":
     closed_loop_simulation()

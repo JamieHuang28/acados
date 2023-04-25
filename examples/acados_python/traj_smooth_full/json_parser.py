@@ -19,7 +19,7 @@ def smoothTheta(thetas):
   
 def loadData():
   data_dir = "./data_0/"
-  data_path = data_dir + "data_0_0.json"
+  data_path = data_dir + "data_0_2.json"
   with open(data_path, "r") as infile: # open file for reading
     j = json.load(infile) # load the JSON object from the file
     
