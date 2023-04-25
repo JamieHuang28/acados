@@ -93,7 +93,7 @@ def plot_apa(shooting_nodes, u_max, U, X_true, X_est=None, Y_measured=None, late
         N_mhe = N_sim - X_est.shape[0]
         t_mhe = np.linspace(N_mhe * Ts, Tf, N_sim-N_mhe)
 
-    u_labels = ['$omega$', '$a$']
+    u_labels = ['$omega$', '$a$', '$u1$', '$u2$', '$u3$', '$u4$', '$u5$', '$u6$', '$u7$', '$u8$']
     for i in range(nu):
         plt.subplot(nu + nx + 1, 1, 1 + i)
         line, = plt.step(t, np.append([U[0, i]], U[:, i]))

@@ -52,7 +52,16 @@ def export_pendulum_ode_model() -> AcadosModel:
 
     omega = SX.sym('omega')
     a = SX.sym('a')
-    u = vertcat(omega, a)
+    u_slack1 = SX.sym('u_slack1')
+    u_slack2 = SX.sym('u_slack2')
+    u_slack3 = SX.sym('u_slack3')
+    u_slack4 = SX.sym('u_slack4')
+    u_slack5 = SX.sym('u_slack5')
+    u_slack6 = SX.sym('u_slack6')
+    u_slack7 = SX.sym('u_slack7')
+    u_slack8 = SX.sym('u_slack8')
+    u = vertcat(omega, a, u_slack1, u_slack2, u_slack3, u_slack4, \
+                u_slack5, u_slack6, u_slack7, u_slack8)
 
     # xdot
     x_dot       = SX.sym('x_dot')
@@ -71,7 +80,10 @@ def export_pendulum_ode_model() -> AcadosModel:
                      v*sin_phi,
                      v*tan_delta/L,
                      omega,
-                     a)
+                     a + u_slack1 - u_slack1 + u_slack2 - u_slack2 \
+                        + u_slack3 -u_slack3 +u_slack4 - u_slack4 \
+                        + u_slack5 - u_slack5 + u_slack6 - u_slack6 \
+                        + u_slack7 - u_slack7 + u_slack8 - u_slack8)
 
     f_impl = xdot - f_expl
 

@@ -39,6 +39,9 @@ from data import load_data
 
 def main():
     traj_ref = load_data()
+    for i in range(len(traj_ref['phi'])):
+        if traj_ref['phi'][i] < 0:
+            traj_ref['phi'][i] += 2 * np.pi
 
     # create ocp object to formulate the OCP
     ocp = AcadosOcp()
@@ -56,9 +59,10 @@ def main():
     ocp.dims.N = N
 
     # set cost
-    Ws = [1, 100, 1, 100]
+    Wus = np.ones(8)
+    Ws = np.append([1, 100, 1, 100], Wus)
     Q_mat = 2*np.diag([0.0, 0.0, 0.0, Ws[0], Ws[2]])
-    R_mat = 2*np.diag([Ws[1], Ws[3]])
+    R_mat = 2*np.diag([Ws[1], Ws[3], Ws[4], Ws[5], Ws[6], Ws[7], Ws[8], Ws[9], Ws[10], Ws[11]])
 
     # the 'EXTERNAL' cost type can be used to define general cost terms
     # NOTE: This leads to additional (exact) hessian contributions when using GAUSS_NEWTON hessian.
@@ -68,17 +72,19 @@ def main():
     ocp.model.cost_expr_ext_cost_e = model.x.T @ Q_mat @ model.x
 
     # set constraints
-    omega_max = 9.0
-    a_max = 9.0
-    ocp.constraints.lbu = np.array([-omega_max, -a_max])
-    ocp.constraints.ubu = np.array([+omega_max, +a_max])
-    ocp.constraints.idxbu = np.array([0, 1])
+    omega_max = 1.0
+    a_max = 5.0
+    u_slack_min = np.zeros(8)
+    u_slack_max = np.ones(8) * 0.1
+    ocp.constraints.lbu = np.append([-omega_max, -a_max], u_slack_min)
+    ocp.constraints.ubu = np.append([+omega_max, +a_max], u_slack_max)
+    ocp.constraints.idxbu = np.arange(0, 10)
 
     x0 = np.array([traj_ref['x'][0], traj_ref['y'][0], traj_ref['phi'][0]])
     ocp.constraints.x0 = x0
 
-    delta_max = 0.9
-    v_max = 9.0
+    delta_max = 0.6
+    v_max = 3.0
     ocp.constraints.lbx = np.array([-delta_max, -v_max])
     ocp.constraints.ubx = np.array([+delta_max, +v_max])
     ocp.constraints.idxbx = np.abs([3, 4])
@@ -87,10 +93,11 @@ def main():
     ocp.constraints.ubx_0 = x0
     ocp.constraints.idxbx_0 = np.array([0, 1, 2])
 
-    xf = np.array([traj_ref['x'][-1], traj_ref['y'][-1], traj_ref['phi'][-1]])
+    xf = np.array([traj_ref['x'][N], traj_ref['y'][N], traj_ref['phi'][N], traj_ref['delta'][N], traj_ref['v'][N]])
+    # print("xf:", xf)
     ocp.constraints.lbx_e = xf
     ocp.constraints.ubx_e = xf
-    ocp.constraints.idxbx_e = np.array([0, 1, 2])
+    ocp.constraints.idxbx_e = np.arange(0, 5)
 
     # set options
     ocp.solver_options.qp_solver = 'PARTIAL_CONDENSING_HPIPM' # FULL_CONDENSING_QPOASES
@@ -112,8 +119,6 @@ def main():
     simU = np.ndarray((N, nu))
 
     # set initial value
-    # x_init = np.linspace(0, Tf, N + 1)
-    # y_init = np.zeros(N + 1)
     for i in range(N + 1):
         ocp_solver.set(i, "x", np.array(\
             [traj_ref['x'][i], traj_ref['y'][i], traj_ref['phi'][i], \
