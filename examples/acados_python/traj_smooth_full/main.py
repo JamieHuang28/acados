@@ -68,9 +68,14 @@ def create_ocp_solver_description() -> AcadosOcp:
     # set options
     ocp.solver_options.qp_solver = "PARTIAL_CONDENSING_HPIPM"  # FULL_CONDENSING_QPOASES
     ocp.solver_options.hessian_approx = "GAUSS_NEWTON"  # 'GAUSS_NEWTON', 'EXACT'
-    ocp.solver_options.integrator_type = "IRK"
+    ocp.solver_options.integrator_type = "ERK"
     ocp.solver_options.nlp_solver_type = "SQP"  # SQP_RTI, SQP
-    ocp.solver_options.nlp_solver_max_iter = 100
+    ocp.solver_options.nlp_solver_max_iter = 50
+    ocp.solver_options.nlp_solver_tol_stat = 1e-6        # default value: 1e-6
+    ocp.solver_options.qp_solver_iter_max = 10           # default value: 50
+    ocp.solver_options.qp_solver_tol_eq = 1e-2
+    ocp.solver_options.qp_solver_tol_ineq = 1e-2
+    ocp.solver_options.qp_solver_tol_comp = 1e-2
 
     # set prediction horizon
     ocp.solver_options.tf = T_horizon
