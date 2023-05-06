@@ -70,8 +70,9 @@ def create_ocp_solver_description() -> AcadosOcp:
     ocp.solver_options.hessian_approx = "GAUSS_NEWTON"  # 'GAUSS_NEWTON', 'EXACT'
     ocp.solver_options.integrator_type = "ERK"
     ocp.solver_options.nlp_solver_type = "SQP"  # SQP_RTI, SQP
-    ocp.solver_options.nlp_solver_max_iter = 50
-    ocp.solver_options.nlp_solver_tol_stat = 1e-6        # default value: 1e-6
+    ocp.solver_options.print_level = 0
+    ocp.solver_options.nlp_solver_max_iter = 500
+    ocp.solver_options.tol = 1e-2
     ocp.solver_options.qp_solver_iter_max = 10           # default value: 50
     ocp.solver_options.qp_solver_tol_eq = 1e-2
     ocp.solver_options.qp_solver_tol_ineq = 1e-2
@@ -99,6 +100,7 @@ def closed_loop_simulation():
     simX = np.ndarray((N_horizon + 1, nx))
     simU = np.ndarray((N_horizon, nu))
 
+    # 1. warm start
     for stage in range(N_horizon + 1):
         xInit = np.array([x[stage], y[stage], phi[stage], delta[stage], v[stage]])
         acados_ocp_solver.set(stage, "x", xInit)
@@ -106,11 +108,13 @@ def closed_loop_simulation():
         uInit = np.array([0.0, 0.0, slackLR_max, slackFR_max])
         acados_ocp_solver.set(stage, "u", uInit)
     
+    # 2. constraint for all stages
     for i in range(N_horizon):
         wheelBase = np.array([3.1])
         acados_ocp_solver.set(i, "p", wheelBase)
 
         if i == 0:
+            # 3. initial constraints
             x0 = np.array([x[0], y[0], phi[0], 0.0, 0.0])
             acados_ocp_solver.set(0, "lbx", x0)
             acados_ocp_solver.set(0, "ubx", x0)
@@ -131,7 +135,7 @@ def closed_loop_simulation():
                 acados_ocp_solver.set(i, "lbx", lbx)
                 acados_ocp_solver.set(i, "ubx", ubx)
 
-
+        # 4. general constraints
         C = np.array(collisionCoeff[(8 * i + 0):(8 * (i + 1) + 0), 0:5])
         D = collisionCoeff[(8 * i + 0):(8 * (i + 1) + 0), 5:9]
         lg = np.array([NUM_MIN, NUM_MIN, NUM_MIN, NUM_MIN, NUM_MIN, NUM_MIN, NUM_MIN, NUM_MIN])
@@ -152,6 +156,7 @@ def closed_loop_simulation():
         acados_ocp_solver.cost_set(i, 'W', ocp.cost.W, api='new')
         acados_ocp_solver.cost_set(i, 'yref', ocp.cost.yref, api='new')
 
+    # 5. terminal constraints
     lbx_e = np.array([x[N_horizon], y[N_horizon], phi[N_horizon], 0.0, 0.0])   
     ubx_e = np.array([x[N_horizon], y[N_horizon], phi[N_horizon], 0.0, 0.0])
     acados_ocp_solver.set(N_horizon, "lbx", lbx_e)
@@ -165,9 +170,9 @@ def closed_loop_simulation():
     status = acados_ocp_solver.solve()
     end_time = time.time()
     print("elapsed_time = ", end_time - start_time)
-    # if status != 0:
-    #     raise Exception(f'acados returned status {status}.')
-    print(f'acados returned status {status}.')
+    if status != 0:
+        raise Exception(f'acados returned status {status}.')
+    # print(f'acados returned status {status}.')
 
     for stage in range(N_horizon + 1):
         simX[stage, :] = acados_ocp_solver.get(stage, "x")

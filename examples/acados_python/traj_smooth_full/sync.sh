@@ -33,8 +33,8 @@ else
     fi
     mkdir -p "$target_dir"
 
-    echo "mv ${1}* ${target_dir}"
-    mv ${1}* ${target_dir} -f
+    echo "cp ${1}* ${target_dir} -rf"
+    cp ${1}* ${target_dir} -rf
 fi
 
 echo 'finished'
