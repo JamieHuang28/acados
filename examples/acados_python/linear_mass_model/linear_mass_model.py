@@ -35,6 +35,8 @@ from acados_template import AcadosModel
 import numpy as np
 from casadi import SX, vertcat
 import matplotlib
+import matplotlib 
+matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
 
 def export_linear_mass_model():

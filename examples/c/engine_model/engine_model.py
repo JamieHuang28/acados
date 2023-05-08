@@ -35,6 +35,8 @@
 from casadi import *
 from casadi.tools import *
 
+import matplotlib 
+matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io as sio

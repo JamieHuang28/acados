@@ -38,6 +38,8 @@ import numpy as np
 from acados_settings_dev import *
 from plotFcn import *
 from tracks.readDataFcn import getTrack
+import matplotlib 
+matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
 
 """

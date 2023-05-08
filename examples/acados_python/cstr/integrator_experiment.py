@@ -40,6 +40,8 @@ from setup_acados_integrator import setup_acados_integrator
 import numpy as np
 from cstr_utils import plot_cstr, latexify
 from matplotlib.lines import Line2D
+import matplotlib 
+matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
 from setup_acados_ocp_solver import setup_acados_ocp_solver
 from main import simulate

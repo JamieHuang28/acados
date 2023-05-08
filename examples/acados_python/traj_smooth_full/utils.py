@@ -38,7 +38,34 @@ matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 
-def plot_pendulum(shooting_nodes, u_max, U, X_true, X_est=None, Y_measured=None, latexify=False, plt_show=True, X_true_label=None):
+def latexify_plot():
+    params = {'backend': 'ps',
+            'text.latex.preamble': r"\usepackage{gensymb} \usepackage{amsmath}",
+            'axes.labelsize': 10,
+            'axes.titlesize': 10,
+            'legend.fontsize': 10,
+            'xtick.labelsize': 10,
+            'ytick.labelsize': 10,
+            'text.usetex': True,
+            'font.family': 'serif'
+    }
+
+    matplotlib.rcParams.update(params)
+
+def plot_xy(x_ref, y_ref, x=None, y=None, plt_show=True):
+    fig = plt.figure()
+    plt.plot(x_ref, y_ref, 'x')
+    plt.xlabel('$x$')
+    plt.ylabel('$y$')
+    plt.axis('equal')
+    if x is not None:
+        plt.plot(x, y)
+    if plt_show:
+        plt.show()
+    return fig
+
+def plot_apa(shooting_nodes, u_max, U, X_true, X_est=None, Y_measured=None, latexify=False, plt_show=True, X_true_label=None):
+    plt.figure()
     """
     Params:
         shooting_nodes: time values of the discretization
@@ -52,23 +79,13 @@ def plot_pendulum(shooting_nodes, u_max, U, X_true, X_est=None, Y_measured=None,
 
     # latexify plot
     if latexify:
-        params = {'backend': 'ps',
-                'text.latex.preamble': r"\usepackage{gensymb} \usepackage{amsmath}",
-                'axes.labelsize': 10,
-                'axes.titlesize': 10,
-                'legend.fontsize': 10,
-                'xtick.labelsize': 10,
-                'ytick.labelsize': 10,
-                'text.usetex': True,
-                'font.family': 'serif'
-        }
-
-        matplotlib.rcParams.update(params)
+        latexify_plot()
 
     WITH_ESTIMATION = X_est is not None and Y_measured is not None
 
     N_sim = X_true.shape[0]
     nx = X_true.shape[1]
+    nu = U.shape[1]
 
     Tf = shooting_nodes[N_sim-1]
     t = shooting_nodes
@@ -78,24 +95,26 @@ def plot_pendulum(shooting_nodes, u_max, U, X_true, X_est=None, Y_measured=None,
         N_mhe = N_sim - X_est.shape[0]
         t_mhe = np.linspace(N_mhe * Ts, Tf, N_sim-N_mhe)
 
-    plt.subplot(nx+1, 1, 1)
-    line, = plt.step(t, np.append([U[0]], U))
-    if X_true_label is not None:
-        line.set_label(X_true_label)
-    else:
-        line.set_color('r')
-    plt.title('closed-loop simulation')
-    plt.ylabel('$u$')
-    plt.xlabel('$t$')
-    plt.hlines(u_max, t[0], t[-1], linestyles='dashed', alpha=0.7)
-    plt.hlines(-u_max, t[0], t[-1], linestyles='dashed', alpha=0.7)
-    plt.ylim([-1.2*u_max, 1.2*u_max])
-    plt.grid()
+    u_labels = ['$omega$', '$a$', '$u1$', '$u2$', '$u3$', '$u4$', '$u5$', '$u6$', '$u7$', '$u8$']
+    for i in range(nu):
+        plt.subplot(nu + nx + 1, 1, 1 + i)
+        line, = plt.step(t, np.append([U[0, i]], U[:, i]))
+        if X_true_label is not None:
+            line.set_label(X_true_label)
+        else:
+            line.set_color('r')
+        # plt.title('closed-loop simulation')
+        plt.ylabel(u_labels[i])
+        plt.xlabel('$t$')
+        # plt.hlines(u_max, t[0], t[-1], linestyles='dashed', alpha=0.7)
+        # plt.hlines(-u_max, t[0], t[-1], linestyles='dashed', alpha=0.7)
+        # plt.ylim([-1.2*u_max, 1.2*u_max])
+        plt.grid()
 
-    states_lables = ['$x$', r'$\theta$', '$v$', r'$\dot{\theta}$']
+    states_lables = ['$x$', '$y$', r'$\phi$', '$delta$', '$v$']
 
     for i in range(nx):
-        plt.subplot(nx+1, 1, i+2)
+        plt.subplot(nu + nx + 1, 1, 1 + nu + i)
         line, = plt.plot(t, X_true[:, i], label='true')
         if X_true_label is not None:
             line.set_label(X_true_label)

@@ -38,6 +38,8 @@ from acados_template import AcadosSim, AcadosSimSolver
 from pendulum_model import export_augmented_pendulum_model
 from utils import plot_pendulum
 import numpy as np
+import matplotlib 
+matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
 
 sim = AcadosSim()

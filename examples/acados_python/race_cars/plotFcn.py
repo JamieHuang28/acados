@@ -36,6 +36,8 @@
 from tracks.readDataFcn import getTrack
 from time2spatial import transformProj2Orig,transformOrig2Proj
 from matplotlib import cm
+import matplotlib 
+matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 

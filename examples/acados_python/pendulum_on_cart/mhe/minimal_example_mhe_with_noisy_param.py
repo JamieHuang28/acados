@@ -160,6 +160,8 @@ ts = np.linspace(0, Tf, N+1)
 plot_pendulum(ts, Fmax, simU, simX, simXest, simY, latexify=False)
 
 
+import matplotlib 
+matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
 import os
 

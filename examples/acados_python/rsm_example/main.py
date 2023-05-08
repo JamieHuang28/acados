@@ -36,6 +36,8 @@ import os
 from casadi import vertcat, atan, exp, cos, sin, sqrt, SX
 import numpy as np
 import matplotlib
+import matplotlib 
+matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
 import scipy.linalg
 
