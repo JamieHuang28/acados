@@ -36,3 +36,6 @@ target_link_libraries(sim_shared_lib acados hpipm blasfeo)
 # 编译自己的例子
 add_executable(${PROJECT_NAME}_main ${CMAKE_CURRENT_SOURCE_DIR}/c_generated_code/main_path_smoother.c)
 target_link_libraries(${PROJECT_NAME}_main ocp_shared_lib)
+
+add_executable(${PROJECT_NAME} src/main.cpp)
+target_link_libraries(${PROJECT_NAME} ocp_shared_lib)
