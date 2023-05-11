@@ -1,4 +1,14 @@
-# acados_ocp_nlp.json
-# acados_ocp.json
-# acados_sim.json
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.out
+*.a
+*.mex*
+
+# Generated files #
 *.json
