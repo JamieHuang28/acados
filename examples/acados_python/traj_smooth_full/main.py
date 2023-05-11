@@ -13,13 +13,22 @@ T_horizon = 10.0  # Define the prediction horizon
 NUM_MIN = -1e10
 NUM_MAX = 1e10
 
-delta_max = 0.61  
-v_max = 10.0
-acceleration_max = 6.0
-wheelAngleRate_max = 0.52
-slackLR_max = 0.05
-slackFR_max = 0.05
-# wheelBase = 3.100
+class Params():
+    def __init__(self):
+        self.delta_max = 0.61  
+        self.v_max = 10.0
+        self.acceleration_max = 6.0
+        self.wheelAngleRate_max = 0.52
+        self.slackLR_max = 0.05
+        self.slackFR_max = 0.05
+        self.wheelBase = 3.100
+        self.vehicleLength = 5.098
+        self.vehicleWidth = 2.116
+        self.Lf = 4.015
+        self.Lr = 1.083
+        self.slack_max = 0.05
+        self.d_safe_side = 1.058
+        self.d_safe_front = 0.05
 
 def create_ocp_solver_description() -> AcadosOcp:
     ocp = AcadosOcp()
@@ -83,15 +92,23 @@ def create_ocp_solver_description() -> AcadosOcp:
 
     return ocp
 
-
-def closed_loop_simulation():
-
-    x, y, phi, delta, v, left_bound, right_bound, front_bound, back_bound = loadData()
-    collisionCoeff = GetCollisionCoeff()
+def closed_loop_simulation(params, x, y, phi, delta, v, left_bound, right_bound, front_bound, back_bound):
+    collisionCoeff = GetCollisionCoeff(params, x, y, phi, left_bound, right_bound, front_bound, back_bound)
+    delta_max = params.delta_max
+    v_max = params.v_max
+    acceleration_max = params.acceleration_max
+    wheelAngleRate_max = params.wheelAngleRate_max
+    slackLR_max = params.slackLR_max
+    slackFR_max = params.slackFR_max
+    wheelBase = params.wheelBase
 
 
     ocp = create_ocp_solver_description()
     acados_ocp_solver = AcadosOcpSolver(ocp, json_file="acados_ocp_" + ocp.model.name + ".json")
+    
+    for i in range(N_horizon + 1):
+        wheelBase = np.array([3.1])
+        acados_ocp_solver.set(i, "p", wheelBase)
 
     nx = ocp.model.x.size()[0]
     nu = ocp.model.u.size()[0]
@@ -110,9 +127,6 @@ def closed_loop_simulation():
     
     # 2. constraint for all stages
     for i in range(N_horizon):
-        wheelBase = np.array([3.1])
-        acados_ocp_solver.set(i, "p", wheelBase)
-
         if i == 0:
             # 3. initial constraints
             x0 = np.array([x[0], y[0], phi[0], 0.0, 0.0])
@@ -162,17 +176,14 @@ def closed_loop_simulation():
     acados_ocp_solver.set(N_horizon, "lbx", lbx_e)
     acados_ocp_solver.set(N_horizon, "ubx", ubx_e)
 
-    wheelBase = np.array([3.1])
-    acados_ocp_solver.set(N_horizon, "p", wheelBase)
-
     # solve ocp
     start_time = time.time()
     status = acados_ocp_solver.solve()
     end_time = time.time()
     print("elapsed_time = ", end_time - start_time)
     if status != 0:
-        raise Exception(f'acados returned status {status}.')
-    # print(f'acados returned status {status}.')
+        # raise Exception(f'acados returned status {status}.')
+        print(f'acados returned status {status}.')
 
     for stage in range(N_horizon + 1):
         simX[stage, :] = acados_ocp_solver.get(stage, "x")
@@ -184,4 +195,12 @@ def closed_loop_simulation():
     plt.show()
 
 if __name__ == "__main__":
-    closed_loop_simulation()
+    import sys
+    # check the count of argv
+    if len(sys.argv) != 2:
+        print("usage: python main.py <data_path>")
+        sys.exit(1)
+    data_path = sys.argv[1]
+    x, y, phi, delta, v, left_bound, right_bound, front_bound, back_bound = loadData(data_path)
+    params = Params()
+    closed_loop_simulation(params, x, y, phi, delta, v, left_bound, right_bound, front_bound, back_bound)

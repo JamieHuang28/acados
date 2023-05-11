@@ -17,9 +17,7 @@ def smoothTheta(thetas):
   for i in range(index, len(thetas)):
     thetas[i] = thetas[i] + 2 * change * math.pi
   
-def loadData():
-  data_dir = "./data_0/"
-  data_path = data_dir + "data_0_2.json"
+def loadData(data_path):
   with open(data_path, "r") as infile: # open file for reading
     j = json.load(infile) # load the JSON object from the file
     
@@ -91,17 +89,15 @@ def GetBackCollisionCoeff(xn, yn, x0, y0, phi, slack_max, d_safe, L, W):
         L * (math.sin(phi) - phi * math.cos(phi)) * yn + phi * W / 2.0
     return (c1, c2, c3, 0.0, 0.0,   0.0, 0.0, 0.0, -1.0,   d)
 
-def GetCollisionCoeff():
-  vehicleLength = 5.098
-  vehicleWidth = 2.116
-  wheelBase = 3.100
-  Lf = 4.015
-  Lr = 1.083
-  slack_max = 0.05
-  d_safe_side = 1.058
-  d_safe_front = 0.05
-
-  x, y, phi, delta, v, left_bound, right_bound, front_bound, back_bound = loadData()
+def GetCollisionCoeff(params, x, y, phi, left_bound, right_bound, front_bound, back_bound):
+  vehicleLength = params.vehicleLength
+  vehicleWidth = params.vehicleWidth
+  wheelBase = params.wheelBase
+  Lf = params.Lf
+  Lr = params.Lr
+  slack_max = params.slack_max
+  d_safe_side = params.d_safe_side
+  d_safe_front = params.d_safe_front
 
   dataLength = len(x)
   collisionCoeff = np.zeros((8 * dataLength, 10))
