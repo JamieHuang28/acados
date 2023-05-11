@@ -2,7 +2,6 @@ from acados_template import AcadosOcp, AcadosOcpSolver
 from vehicle_model import export_vehicle_model
 import numpy as np
 import scipy.linalg
-from collision_coeff import GetCollisionCoeff
 import time
 
 N_horizon = 100   # Define the number of discretization steps
@@ -90,8 +89,7 @@ def create_ocp_solver_description() -> AcadosOcp:
 
     return ocp
 
-def closed_loop_simulation(params, x, y, phi, delta, v, left_bound, right_bound, front_bound, back_bound):
-    collisionCoeff = GetCollisionCoeff(params, x, y, phi, left_bound, right_bound, front_bound, back_bound)
+def closed_loop_simulation(params, x, y, phi, delta, v, collisionCoeff):
     delta_max = params.delta_max
     v_max = params.v_max
     acceleration_max = params.acceleration_max
