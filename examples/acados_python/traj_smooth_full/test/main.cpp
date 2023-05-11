@@ -109,5 +109,18 @@ int main(int argc, char **argv)
             return -1;
         }
     }
+
+    int status = 0;
+    // free solver
+    status = path_smoother_acados_free(acados_ocp_capsule);
+    if (status) {
+        printf("path_smoother_acados_free() returned status %d. \n", status);
+    }
+    // free solver capsule
+    status = path_smoother_acados_free_capsule(acados_ocp_capsule);
+    if (status) {
+        printf("path_smoother_acados_free_capsule() returned status %d. \n", status);
+    }
+
     return 0;
 }
