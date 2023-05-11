@@ -89,7 +89,7 @@ def create_ocp_solver_description() -> AcadosOcp:
 
     return ocp
 
-def closed_loop_simulation(params, x, y, phi, delta, v, collisionCoeff):
+def closed_loop_simulation(params, ocp, x, y, phi, delta, v, collisionCoeff):
     delta_max = params.delta_max
     v_max = params.v_max
     acceleration_max = params.acceleration_max
@@ -99,7 +99,6 @@ def closed_loop_simulation(params, x, y, phi, delta, v, collisionCoeff):
     wheelBase = params.wheelBase
 
 
-    ocp = create_ocp_solver_description()
     acados_ocp_solver = AcadosOcpSolver(ocp, json_file="acados_ocp_" + ocp.model.name + ".json")
     
     for i in range(N_horizon + 1):

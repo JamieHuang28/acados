@@ -24,6 +24,7 @@ path_smoother_solver_capsule * create_ocp_solver_description() {
 }
 
 Eigen::MatrixXd closed_loop_simulation(const AcadosParams &params,
+    path_smoother_solver_capsule *acados_ocp_capsule,
     const Eigen::VectorXd &x,
     const Eigen::VectorXd &y, const Eigen::VectorXd &phi,
     const Eigen::VectorXd &delta, const Eigen::VectorXd &v,
@@ -36,8 +37,7 @@ Eigen::MatrixXd closed_loop_simulation(const AcadosParams &params,
         }
         collisionCoeff.push_back(tmp_row);
     }
-
-    path_smoother_solver_capsule *acados_ocp_capsule = create_ocp_solver_description();
+    
     int N = PATH_SMOOTHER_N;    // 100
     int status = 0;
 

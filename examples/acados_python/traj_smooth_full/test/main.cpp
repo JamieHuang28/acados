@@ -10,6 +10,8 @@ using json = nlohmann::json;
 
 AcadosParams acados_params;
 
+path_smoother_solver_capsule *acados_ocp_capsule = create_ocp_solver_description();
+
 void RecordToFile(std::string file_name, const Eigen::VectorXd &x_ref, const Eigen::VectorXd &y_ref) {
     std::ofstream ofs(file_name);
     size_t min_size = std::min(x_ref.size(), y_ref.size());
@@ -41,7 +43,7 @@ int plan(const std::string &file_name)
     Eigen::MatrixXd collision_coeff_mat = GetCollisionCoeff(
         acados_params, x, y, phi, v, left_bound, right_bound, front_bound, back_bound);
     std::string debug_str;
-    Eigen::MatrixXd traj_x = closed_loop_simulation(acados_params, x, y, phi, delta, v, collision_coeff_mat, debug_str);
+    Eigen::MatrixXd traj_x = closed_loop_simulation(acados_params, acados_ocp_capsule, x, y, phi, delta, v, collision_coeff_mat, debug_str);
 
     // dump infomation to file
     RecordToFile(file_name + std::string("_ref.data"), x, y);

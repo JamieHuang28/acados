@@ -1,8 +1,10 @@
 from data import loadData
 from collision_coeff import GetCollisionCoeff
-from acados_main import AcadosParams, closed_loop_simulation
+from acados_main import AcadosParams, create_ocp_solver_description, closed_loop_simulation
 from utils import plot_xy, plot_apa
 import matplotlib.pyplot as plt
+
+ocp = create_ocp_solver_description()
 
 def plan(file_name):
     # load data
@@ -11,7 +13,7 @@ def plan(file_name):
 
     collisionCoeff = GetCollisionCoeff(params, x, y, phi, left_bound, right_bound, front_bound, back_bound)
     # run closed loop simulation
-    simX, simU = closed_loop_simulation(params, x, y, phi, delta, v, collisionCoeff)
+    simX, simU = closed_loop_simulation(params, ocp, x, y, phi, delta, v, collisionCoeff)
 
     # plot results
     plot_xy(x, y, simX[:, 0], simX[:, 1], plt_show=False)
