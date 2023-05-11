@@ -3,7 +3,8 @@ from vehicle_model import export_vehicle_model
 import numpy as np
 import scipy.linalg
 from utils import plot_xy, plot_apa
-from json_parser import GetCollisionCoeff, loadData
+from collision_coeff import GetCollisionCoeff
+from data import loadData
 import matplotlib.pyplot as plt
 import time
 
@@ -189,9 +190,19 @@ def closed_loop_simulation(params, x, y, phi, delta, v, left_bound, right_bound,
         simX[stage, :] = acados_ocp_solver.get(stage, "x")
     for stage in range(N_horizon):
         simU[stage, :] = acados_ocp_solver.get(stage, "u")
-    
+    return simX, simU
+
+def plan(file_name):
+    # load data
+    x, y, phi, delta, v, left_bound, right_bound, front_bound, back_bound = loadData(data_path)
+    params = Params()
+
+    # run closed loop simulation
+    simX, simU = closed_loop_simulation(params, x, y, phi, delta, v, left_bound, right_bound, front_bound, back_bound)
+
+    # plot results
     plot_xy(x, y, simX[:, 0], simX[:, 1], plt_show=False)
-    plot_apa(np.linspace(0, T_horizon, N_horizon+1), 1.0, simU, simX, latexify=False, plt_show=False)
+    # plot_apa(np.linspace(0, T_horizon, N_horizon+1), 1.0, simU, simX, latexify=False, plt_show=False)
     plt.show()
 
 if __name__ == "__main__":
@@ -201,6 +212,4 @@ if __name__ == "__main__":
         print("usage: python main.py <data_path>")
         sys.exit(1)
     data_path = sys.argv[1]
-    x, y, phi, delta, v, left_bound, right_bound, front_bound, back_bound = loadData(data_path)
-    params = Params()
-    closed_loop_simulation(params, x, y, phi, delta, v, left_bound, right_bound, front_bound, back_bound)
+    plan(data_path)
