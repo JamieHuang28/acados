@@ -1,0 +1,14 @@
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.out
+*.a
+*.mex*
+
+# Generated files #
+*.json
