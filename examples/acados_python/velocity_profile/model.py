@@ -32,17 +32,17 @@
 #
 
 from acados_template import AcadosModel
-from casadi import SX, vertcat, sin, cos
+from casadi import SX, vertcat
 
 def export_ode_model() -> AcadosModel:
 
-    model_name = '1d_movement_ode'
+    model_name = 'one_dim_movement_ode'
 
     # set up states & controls
     x = SX.sym('x')
     v = SX.sym('v')
 
-    x = vertcat(x, v)
+    Xx = vertcat(x, v)
 
     a = SX.sym('a')
     u = vertcat(a)
@@ -51,19 +51,19 @@ def export_ode_model() -> AcadosModel:
     x_dot = SX.sym('x_dot')
     v_dot = SX.sym('v_dot')
 
-    xdot = vertcat(x_dot, v_dot)
+    Xxdot = vertcat(x_dot, v_dot)
 
     # dynamics
     f_expl = vertcat(v, a)
 
-    f_impl = xdot - f_expl
+    f_impl = Xxdot - f_expl
 
     model = AcadosModel()
 
     model.f_impl_expr = f_impl
     model.f_expl_expr = f_expl
-    model.x = x
-    model.xdot = xdot
+    model.x = Xx
+    model.xdot = Xxdot
     model.u = u
     model.name = model_name
 

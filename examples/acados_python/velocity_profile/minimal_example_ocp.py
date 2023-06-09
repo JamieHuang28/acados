@@ -32,7 +32,7 @@
 #
 
 from acados_template import AcadosOcp, AcadosOcpSolver
-from examples.acados_python.velocity_profile.model import export_ode_model
+from model import export_ode_model
 import numpy as np
 from utils import plot
 
@@ -53,8 +53,8 @@ def main():
     ocp.dims.N = N
 
     # set cost
-    Q_mat = 2*np.diag([0, 1])
-    R_mat = 2*np.diag([1])
+    Q_mat = np.diag([0, 1])
+    R_mat = np.diag([1])
 
     # the 'EXTERNAL' cost type can be used to define general cost terms
     # NOTE: This leads to additional (exact) hessian contributions when using GAUSS_NEWTON hessian.
@@ -70,7 +70,9 @@ def main():
     ocp.constraints.idxbu = np.array([0])
 
     ocp.constraints.x0 = np.array([0, 0])
-    ocp.constraints.xe = np.array([1.0, 0])
+    ocp.constraints.lbx_e = np.array([1.0, 0])
+    ocp.constraints.ubx_e = np.array([1.0, 0])
+    ocp.constraints.idxbx_e = np.array([0, 1])
 
     # set options
     ocp.solver_options.qp_solver = 'PARTIAL_CONDENSING_HPIPM' # FULL_CONDENSING_QPOASES
